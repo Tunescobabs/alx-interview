@@ -1,40 +1,29 @@
 #!/usr/bin/python3
-"""Determines a valid UTF-8 encoding"""
+"""
+UTF-8 Validation
+"""
 
 
 def validUTF8(data):
     """
-    bit1 checks if significant byte is 1
-    bit2 checks if second significant byte is 0
-    nbytes keeps track of how many 1s before 0 occurs
-    data represented by a list of integers to check
+    data: a list of integers
+    Return: True if data is a valid UTF-8
+    encoding, else return False
     """
+    byte_count = 0
 
-    bit1 = 1 << 7
-    bit2 = 1 << 6
-    nbytes = 0
-
-    if not data or len(data) == 0:
-        return True
-
-    for num in data:
-        bit = 1 << 7
-        if nbytes == 0:
-            while (bit & num):
-                nbytes += 1
-                bit = bit >> 1
-
-            if nbytes == 0:
-                continue
-            if nbytes == 1 or nbytes > 4:
+    for i in data:
+        if byte_count == 0:
+            if i >> 5 == 0b110 or i >> 5 == 0b1110:
+                byte_count = 1
+            elif i >> 4 == 0b1110:
+                byte_count = 2
+            elif i >> 3 == 0b11110:
+                byte_count = 3
+            elif i >> 7 == 0b1:
                 return False
         else:
-
-            if not (num & bit1 and not (num & bit2)):
+            if i >> 6 != 0b10:
                 return False
-        nbytes -= 1
-
-    if nbytes:
-        return False
-    else:
-        return True
+            byte_count -= 1
+    return byte_count == 0
